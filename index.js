@@ -21,30 +21,46 @@ app.get('/questions', async (req, res) => {
 })
 
 app.get('/questions/:questionId', async (req, res) => {
-  const question = await req.repositories.questionRepo.getQuestionById(req.params.questionId)
-  res.json(question)
+  try {
+    const question = await req.repositories.questionRepo.getQuestionById(req.params.questionId)
+    res.json(question)
+  } catch (e) {
+    res.status(404).json({ message: e.message })
+  }
 })
 
-app.post('/questions', async (req, res) => { 
+app.post('/questions', async (req, res) => {
   const question = await req.repositories.questionRepo.addQuestion(req.body)
   res.json(question)
 })
 
-app.get('/questions/:questionId/answers', async (req, res) => { 
-  const answers = await req.repositories.questionRepo.getAnswers(req.params.questionId)
-  res.json(answers)
+app.get('/questions/:questionId/answers', async (req, res) => {
+  try {
+    const answers = await req.repositories.questionRepo.getAnswers(req.params.questionId)
+    res.json(answers)
+  } catch (e) {
+    res.status(404).json({ message: e.message })
+  }
 })
 
 app.post('/questions/:questionId/answers', async (req, res) => {
-  const question = req.params.questionId
-  const answer = await req.repositories.questionRepo.addAnswer(question, req.body)
-  res.json(answer)
- })
+  try {
+    const questionId = req.params.questionId
+    const answer = await req.repositories.questionRepo.addAnswer(questionId, req.body)
+    res.json(answer)
+  } catch (e) {
+    res.status(404).json({ message: e.message })
+  }
+})
 
-app.get('/questions/:questionId/answers/:answerId', async (req, res) => { 
-  const { questionId, answerId} = req.params
-  const answer = await req.repositories.questionRepo.getAnswer(questionId, answerId)
-  res.json(answer)
+app.get('/questions/:questionId/answers/:answerId', async (req, res) => {
+  try {
+    const { questionId, answerId } = req.params
+    const answer = await req.repositories.questionRepo.getAnswer(questionId, answerId)
+    res.json(answer)
+  } catch (e) {
+    res.status(404).json({ message: e.message })
+  }
 })
 
 app.listen(PORT, () => {
