@@ -20,10 +20,9 @@ app.get('/questions', async (req, res) => {
   res.json(questions)
 })
 
-app.get('/questions/:questionId', async (error, req, res, next) => {
+app.get('/questions/:questionId', async (req, res) => {
   const question = await req.repositories.questionRepo.getQuestionById(req.params.questionId)
-  res.status(question[0]).json(question[1])
-  next(error)
+  res.json(question)
 })
 
 app.post('/questions', async (req, res) => { 
