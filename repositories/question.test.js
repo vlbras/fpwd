@@ -84,16 +84,16 @@ describe('question repository', () => {
         const answer = await questionRepo.getAnswer(testQuestions[0].id, testAnswer.id)
         expect(answer).toBeTruthy()
       })
+    })
 
-      describe("otherwise", () => {
-        test('should throw an error', async () => {
-          try {
-            await questionRepo.getAnswer(testQuestions[0].id, undefined)
-          } catch (e) {
-            expect(e).toBeInstanceOf(Error)
-            expect(e.message).toEqual(`Answer #undefined not found!`)
-          }
-        })
+    describe("otherwise", () => {
+      test('should throw an error', async () => {
+        try {
+          await questionRepo.getAnswer(testQuestions[0].id, undefined)
+        } catch (e) {
+          expect(e).toBeInstanceOf(Error)
+          expect(e.message).toEqual(`Answer #undefined not found!`)
+        }
       })
     })
   })
