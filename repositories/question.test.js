@@ -8,7 +8,7 @@ describe('question repository', () => {
   let testAnswer
   let testQuestions = []
 
-  let random = async () =>{
+  const randomData = () => {
     return {
       id: faker.datatype.uuid(),
       summary: faker.lorem.sentence(3).slice(0, -1),
@@ -18,53 +18,83 @@ describe('question repository', () => {
 
   beforeAll(async () => {
     await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify([]))
-
     questionRepo = makeQuestionRepository(TEST_QUESTIONS_FILE_PATH)
-  })
 
-  beforeAll(async () => {
-    testAnswer = await random()
+    testAnswer = randomData()
 
-    testQuestions = [
-      await random(),
-      await random()
-    ]
-    testQuestions[0].answers= []
-    testQuestions[1].answers= []
+    testQuestions.push(randomData())
+    testQuestions[0].answers = []
   })
 
   afterAll(async () => {
     await rm(TEST_QUESTIONS_FILE_PATH)
   })
 
-  test('should return a list of 0 questions', async () => {
-    expect(await questionRepo.getQuestions()).toHaveLength(0)
+  describe("addQuestion", () => {
+    test('should return a question', async () => {
+      const question = await questionRepo.addQuestion(testQuestions[0])
+      expect(question).toEqual(testQuestions[0])
+    })
   })
 
-  test('should return a list of 2 questions', async () => {
-    await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
-    expect(await questionRepo.getQuestions()).toHaveLength(2)
+  describe("getQuestions", () => {
+    test('should return a list of 1 question', async () => {
+      await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
+      expect(await questionRepo.getQuestions()).toHaveLength(1)
+    })
   })
 
-  test('should return 1 question', async () => {
-    const question = await questionRepo.getQuestionById(testQuestions[0].id)
-    expect(question).toBeTruthy();
+  describe("getQuestion:id", () => {
+    describe("when question with id exists", () => {
+      test('should return 1 question', async () => {
+        const question = await questionRepo.getQuestionById(testQuestions[0].id)
+        expect(question).toBeTruthy();
+      })
+    })
+
+    describe("otherwise", () => {
+      test("should throw an error", async () => {
+        try {
+          await questionRepo.getQuestionById(undefined)
+        } catch (e) {
+          expect(e).toBeInstanceOf(Error)
+          expect(e.message).toEqual(`Question #undefined not found!`)
+        }
+      })
+    })
   })
 
-  test('should return a list of 0 answers', async () => {
-    const answers = await questionRepo.getAnswers(testQuestions[0].id)
-    expect(answers).toHaveLength(0)
+  describe("addAnswer", () => {
+    test('should return an answer', async () => {
+      const answer = await questionRepo.addAnswer(testQuestions[0].id, testAnswer)
+      expect(answer).toEqual(testAnswer)
+    })
   })
 
-  test('should return 1 answer', async () => {
-    const index = testQuestions.findIndex(q => q.id === testQuestions[0].id)
-    await testQuestions[index].answers.push(testAnswer)
-    await writeFile(TEST_QUESTIONS_FILE_PATH, JSON.stringify(testQuestions))
-    expect(testQuestions[index].answers).toHaveLength(1)
+  describe("getAnswers", () => {
+    test('should return a list of 1 answer', async () => {
+      const answers = await questionRepo.getAnswers(testQuestions[0].id)
+      expect(answers).toHaveLength(1)
+    })
   })
 
-  test('should return 1 answer', async () => {
-    const answer = await testQuestions[0].answers.find(a => a.id === testAnswer.id)
-    expect(answer).toBeTruthy()
+  describe("getAnswer:id", () => {
+    describe("when answer with id exist", () => {
+      test('should return 1 answer', async () => {
+        const answer = await questionRepo.getAnswer(testQuestions[0].id, testAnswer.id)
+        expect(answer).toBeTruthy()
+      })
+
+      describe("otherwise", () => {
+        test('should throw an error', async () => {
+          try {
+            await questionRepo.getAnswer(testQuestions[0].id, undefined)
+          } catch (e) {
+            expect(e).toBeInstanceOf(Error)
+            expect(e.message).toEqual(`Answer #undefined not found!`)
+          }
+        })
+      })
+    })
   })
 })
